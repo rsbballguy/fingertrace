@@ -8,6 +8,7 @@
 
 #import "ViewController.h"
 #import <opencv2/opencv.hpp>
+#import <opencv2/imgproc.hpp>
 @interface ViewController ()
 
 @end
@@ -44,17 +45,27 @@
 //    cvtColor(image, image_copy, CV_BGRA2BGR);
 //    bitwise_not(image_copy, image_copy);
 //    cvtColor(image_copy, image, CV_BGR2BGRA);
+    std::vector<std::vector<cv::Point> > contours;
+    std::vector<cv::Vec4i> hierarchy;
+    cv::findContours( image, contours, hierarchy, cv::RETR_CCOMP, cv::CHAIN_APPROX_TC89_KCOS);
+    for ( size_t i=0; i<contours.size(); ++i )
+    {
+        cv::drawContours( image, contours, i, cvScalar(200,0,0), 1, 8, hierarchy, 0 );
+        cv::Rect brect = cv::boundingRect(contours[i]);
+        cv::rectangle(image, brect, cvScalar(255,0,0));
+    }
      UIImage *thisimage = [self UIImageFromCVMat:image];
-    NSArray *thisarray = [self getRGBAsFromImage:thisimage atX:10 andY:10 count:1];
-    //NSLog(@"%@",thisarray);
-    NSString *thecolors = thisarray[0];
-    NSLog(@"%@", thecolors);
+    CGFloat red, green, blue, alpha;
+    for(int x = 0; x<thisimage.size.width; x++){
+        for(int y=0; y<thisimage.size.height; y++){
+            NSArray *thisarray = [self getRGBAsFromImage:thisimage atX:x andY:y count:1];
+            UIColor *redColor = thisarray[0];
+            [redColor getRed: &red green: &green blue: &blue alpha: &alpha];
+            
+        }
+    }
 }
 #endif
--(void)returncolors:(NSString*)colors
-{
-    
-}
 -(UIImage *)UIImageFromCVMat:(cv::Mat)cvMat
 {
     NSData *data = [NSData dataWithBytes:cvMat.data length:cvMat.elemSize()*cvMat.total()];
