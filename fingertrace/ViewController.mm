@@ -22,7 +22,7 @@
 //    [alert show];
     self.videoCamera = [[CvVideoCamera alloc] initWithParentView:_ImageView];
     self.videoCamera.delegate = self;
-    self.videoCamera.defaultAVCaptureDevicePosition = AVCaptureDevicePositionBack;
+    self.videoCamera.defaultAVCaptureDevicePosition = AVCaptureDevicePositionFront;
     self.videoCamera.defaultAVCaptureSessionPreset = AVCaptureSessionPreset352x288;
     self.videoCamera.defaultAVCaptureVideoOrientation = AVCaptureVideoOrientationPortraitUpsideDown;
     self.videoCamera.defaultFPS = 30;
@@ -45,8 +45,10 @@
 //    cvtColor(image, image_copy, CV_BGRA2BGR);
 //    bitwise_not(image_copy, image_copy);
 //    cvtColor(image_copy, image, CV_BGR2BGRA);
+    UIImage *thisimage = [self UIImageFromCVMat:image];
     std::vector<std::vector<cv::Point> > contours;
     std::vector<cv::Vec4i> hierarchy;
+    cvStartFindContours(<#CvArr *image#>, <#CvMemStorage *storage#>)
     cv::findContours( image, contours, hierarchy, cv::RETR_CCOMP, cv::CHAIN_APPROX_TC89_KCOS);
     for ( size_t i=0; i<contours.size(); ++i )
     {
@@ -54,7 +56,6 @@
         cv::Rect brect = cv::boundingRect(contours[i]);
         cv::rectangle(image, brect, cvScalar(255,0,0));
     }
-     UIImage *thisimage = [self UIImageFromCVMat:image];
     CGFloat red, green, blue, alpha;
     for(int x = 0; x<thisimage.size.width; x++){
         for(int y=0; y<thisimage.size.height; y++){
