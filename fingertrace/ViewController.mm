@@ -9,12 +9,22 @@
 #import "ViewController.h"
 #import <opencv2/opencv.hpp>
 #import <opencv2/imgproc.hpp>
+#import <opencv2/highgui.hpp>
+#import <opencv2/highgui/highgui.hpp>
+#include <iostream>
+#include <stdio.h>
+#include <stdlib.h>
 @interface ViewController ()
 
 @end
 
 @implementation ViewController
-
+cv::Mat canny_output;
+cv::Mat src;
+cv::Mat src_gray;
+cv::RNG rng(12345);
+//std::vector<std::vector<Point> > contours;
+//std::vector<cv::Vec4i> hierarchy;
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
@@ -49,24 +59,40 @@
     CvMemStorage *connectedCompStorage = cvCreateMemStorage (0);
     std::vector<std::vector<cv::Point> > contours;
     std::vector<cv::Vec4i> hierarchy;
-    IplImage tmp = image;
-    cvStartFindContours(&tmp, connectedCompStorage);
-    cv::findContours( image, contours, hierarchy, cv::RETR_CCOMP, cv::CHAIN_APPROX_TC89_KCOS);
-    for ( size_t i=0; i<contours.size(); ++i )
+    //IplImage tmp = image;
+    int thresh = 100;
+    int max_thresh = 255;
+    src = image;
+    cvtColor( src, src_gray, CV_BGR2GRAY );
+    blur( src_gray, src_gray, cvSize(3, 3));
+    Canny( src_gray, canny_output, thresh, thresh*2, 3 );
+    /// Find contours
+    findContours( canny_output, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE);
+    /// Draw contours
+    cv::Mat drawing = cv::Mat::zeros( canny_output.size(), CV_8UC3 );
+    for( int i = 0; i< contours.size(); i++ )
     {
-        cv::drawContours( image, contours, i, cvScalar(200,0,0), 1, 8, hierarchy, 0 );
-        cv::Rect brect = cv::boundingRect(contours[i]);
-        cv::rectangle(image, brect, cvScalar(255,0,0));
+        cv::Scalar color = cvScalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
+        drawContours( drawing, contours, i, color, 2, 8, hierarchy, 0, Point() );
     }
-    CGFloat red, green, blue, alpha;
-    for(int x = 0; x<thisimage.size.width; x++){
-        for(int y=0; y<thisimage.size.height; y++){
-            NSArray *thisarray = [self getRGBAsFromImage:thisimage atX:x andY:y count:1];
-            UIColor *redColor = thisarray[0];
-            [redColor getRed: &red green: &green blue: &blue alpha: &alpha];
-            
-        }
-    }
+    
+    //CvContourScanner thisscanner = cvStartFindContours(&image, connectedCompStorage);
+//    cv::findContours( image, contours, hierarchy, cv::RETR_CCOMP, cv::CHAIN_APPROX_TC89_KCOS);
+//    for ( size_t i=0; i<contours.size(); ++i )
+//    {
+//        cv::drawContours( image, contours, i, cvScalar(200,0,0), 1, 8, hierarchy, 0 );
+//        cv::Rect brect = cv::boundingRect(contours[i]);
+//        cv::rectangle(image, brect, cvScalar(255,0,0));
+//    }
+//    CGFloat red, green, blue, alpha;
+//    for(int x = 0; x<thisimage.size.width; x++){
+//        for(int y=0; y<thisimage.size.height; y++){
+//            NSArray *thisarray = [self getRGBAsFromImage:thisimage atX:x andY:y count:1];
+//            UIColor *redColor = thisarray[0];
+//            [redColor getRed: &red green: &green blue: &blue alpha: &alpha];
+//            
+//        }
+//    }
 }
 #endif
 -(UIImage *)UIImageFromCVMat:(cv::Mat)cvMat
