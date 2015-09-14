@@ -73,7 +73,7 @@ cv::RNG rng(12345);
     for( int i = 0; i< contours.size(); i++ )
     {
         cv::Scalar color = cvScalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
-        drawContours( drawing, contours, i, color, 2, 8, hierarchy, 0, Point() );
+        drawContours( drawing, contours, i, color, CV_FILLED,  8, hierarchy);
     }
     
     //CvContourScanner thisscanner = cvStartFindContours(&image, connectedCompStorage);
