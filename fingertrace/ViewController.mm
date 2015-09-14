@@ -46,9 +46,11 @@
 //    bitwise_not(image_copy, image_copy);
 //    cvtColor(image_copy, image, CV_BGR2BGRA);
     UIImage *thisimage = [self UIImageFromCVMat:image];
+    CvMemStorage *connectedCompStorage = cvCreateMemStorage (0);
     std::vector<std::vector<cv::Point> > contours;
     std::vector<cv::Vec4i> hierarchy;
-    cvStartFindContours(<#CvArr *image#>, <#CvMemStorage *storage#>)
+    IplImage tmp = image;
+    cvStartFindContours(&tmp, connectedCompStorage);
     cv::findContours( image, contours, hierarchy, cv::RETR_CCOMP, cv::CHAIN_APPROX_TC89_KCOS);
     for ( size_t i=0; i<contours.size(); ++i )
     {
