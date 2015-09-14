@@ -13,6 +13,7 @@
 @interface ViewController : UIViewController <CvVideoCameraDelegate>
 @property (strong, nonatomic) IBOutlet UIImageView *ImageView;
 @property (nonatomic, retain) CvVideoCamera* videoCamera;
+@property (strong, nonatomic) IBOutlet UIImageView *contourimg;
 -(UIImage *)UIImageFromCVMat:(cv::Mat)cvMat;
 -(NSArray*)getRGBAsFromImage:(UIImage*)image atX:(int)x andY:(int)y count:(int)count;
 @end

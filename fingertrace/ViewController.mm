@@ -55,7 +55,7 @@ cv::RNG rng(12345);
 //    cvtColor(image, image_copy, CV_BGRA2BGR);
 //    bitwise_not(image_copy, image_copy);
 //    cvtColor(image_copy, image, CV_BGR2BGRA);
-    UIImage *thisimage = [self UIImageFromCVMat:image];
+   
     CvMemStorage *connectedCompStorage = cvCreateMemStorage (0);
     std::vector<std::vector<cv::Point> > contours;
     std::vector<cv::Vec4i> hierarchy;
@@ -67,7 +67,7 @@ cv::RNG rng(12345);
     blur( src_gray, src_gray, cvSize(3, 3));
     Canny( src_gray, canny_output, thresh, thresh*2, 3 );
     /// Find contours
-    findContours( canny_output, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE);
+    findContours( canny_output, contours, hierarchy, CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE);
     /// Draw contours
     cv::Mat drawing = cv::Mat::zeros( canny_output.size(), CV_8UC3 );
     for( int i = 0; i< contours.size(); i++ )
@@ -75,6 +75,11 @@ cv::RNG rng(12345);
         cv::Scalar color = cvScalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
         drawContours( drawing, contours, i, color, CV_FILLED,  8, hierarchy);
     }
+    //NSLog(@"DONEDONEDONEDONEDONE");
+    UIImage *imag = [self UIImageFromCVMat:drawing];
+    
+     UIImage *thisimage = [self UIImageFromCVMat:drawing];
+     [_contourimg setImage:imag];
     
     //CvContourScanner thisscanner = cvStartFindContours(&image, connectedCompStorage);
 //    cv::findContours( image, contours, hierarchy, cv::RETR_CCOMP, cv::CHAIN_APPROX_TC89_KCOS);
