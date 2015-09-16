@@ -39,6 +39,8 @@ cv::RNG rng(12345);
     self.videoCamera.rotateVideo = NO;
 //    self.videoCamera.grayscale = NO;
     [self.videoCamera start];
+    _contourimg.transform = CGAffineTransformMakeRotation(M_PI);
+    _ImageView.transform = CGAffineTransformMakeRotation((M_PI*3)/2);
 }
 
 - (void)didReceiveMemoryWarning {
@@ -50,36 +52,42 @@ cv::RNG rng(12345);
 #ifdef __cplusplus
 -(void)processImage:(cv::Mat &)image
 {
-    // Do some OpenCV stuff with the image
-//    cv::Mat image_copy;
-//    cvtColor(image, image_copy, CV_BGRA2BGR);
-//    bitwise_not(image_copy, image_copy);
-//    cvtColor(image_copy, image, CV_BGR2BGRA);
-   
-    CvMemStorage *connectedCompStorage = cvCreateMemStorage (0);
     std::vector<std::vector<cv::Point> > contours;
     std::vector<cv::Vec4i> hierarchy;
-    //IplImage tmp = image;
     int thresh = 100;
-    int max_thresh = 255;
     src = image;
     cvtColor( src, src_gray, CV_BGR2GRAY );
     blur( src_gray, src_gray, cvSize(3, 3));
     Canny( src_gray, canny_output, thresh, thresh*2, 3 );
-    /// Find contours
     findContours( canny_output, contours, hierarchy, CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE);
-    /// Draw contours
     cv::Mat drawing = cv::Mat::zeros( canny_output.size(), CV_8UC3 );
+    std::vector<std::vector<cv::Point> >hull( contours.size() );
+    std::vector<cv::Vec4i>convexdef;
+    for( int i = 0; i < contours.size(); i++ )
+    {
+         convexHull( cv::Mat(contours[i]), hull[i], false, true);
+    }
+//    int j = 0;
+//    for(j = 0; j < contours.size(); j++ )
+//    {
+//        cv::convexityDefects(contours[j], hull, convexdef);
+//    }
+//    for (auto vec : convexdef){
+//        std::cout << vec << std::endl;
+//    }
     for( int i = 0; i< contours.size(); i++ )
     {
         cv::Scalar color = cvScalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
         drawContours( drawing, contours, i, color, CV_FILLED,  8, hierarchy);
+        drawContours( drawing, hull, i, color, 4, 8, std::vector<cv::Vec4i>());
     }
-    //NSLog(@"DONEDONEDONEDONEDONE");
+ 
     UIImage *imag = [self UIImageFromCVMat:drawing];
+
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [_contourimg setImage:imag];
+    });
     
-     UIImage *thisimage = [self UIImageFromCVMat:drawing];
-     [_contourimg setImage:imag];
     
     //CvContourScanner thisscanner = cvStartFindContours(&image, connectedCompStorage);
 //    cv::findContours( image, contours, hierarchy, cv::RETR_CCOMP, cv::CHAIN_APPROX_TC89_KCOS);
@@ -121,8 +129,6 @@ cv::RNG rng(12345);
 - (NSArray*)getRGBAsFromImage:(UIImage*)image atX:(int)x andY:(int)y count:(int)count
 {
     NSMutableArray *result = [NSMutableArray arrayWithCapacity:count];
-    
-    // First get the image into your data buffer
     CGImageRef imageRef = [image CGImage];
     NSUInteger width = CGImageGetWidth(imageRef);
     NSUInteger height = CGImageGetHeight(imageRef);
@@ -139,7 +145,6 @@ cv::RNG rng(12345);
     CGContextDrawImage(context, CGRectMake(0, 0, width, height), imageRef);
     CGContextRelease(context);
     
-    // Now your rawData contains the image data in the RGBA8888 pixel format.
     NSUInteger byteIndex = (bytesPerRow * y) + x * bytesPerPixel;
     for (int i = 0 ; i < count ; ++i)
     {
