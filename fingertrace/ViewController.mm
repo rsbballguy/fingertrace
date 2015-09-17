@@ -23,6 +23,7 @@ cv::Mat canny_output;
 cv::Mat src;
 cv::Mat src_gray;
 cv::RNG rng(12345);
+Ptr<BackgroundSubtractor> pMOG2;
 //std::vector<std::vector<Point> > contours;
 //std::vector<cv::Vec4i> hierarchy;
 - (void)viewDidLoad {
@@ -36,7 +37,7 @@ cv::RNG rng(12345);
     self.videoCamera.defaultAVCaptureSessionPreset = AVCaptureSessionPreset352x288;
     self.videoCamera.defaultAVCaptureVideoOrientation = AVCaptureVideoOrientationPortraitUpsideDown;
     self.videoCamera.defaultFPS = 30;
-    self.videoCamera.rotateVideo = NO;
+    self.videoCamera.rotateVideo = YES;
 //    self.videoCamera.grayscale = NO;
     [self.videoCamera start];
     _contourimg.transform = CGAffineTransformMakeRotation(M_PI);
@@ -47,6 +48,12 @@ cv::RNG rng(12345);
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
+- (IBAction)flip:(id)sender {
+    NSLog(@"Button Pressed");
+    dispatch_async(dispatch_get_main_queue(), ^{
+        self.videoCamera.defaultAVCaptureDevicePosition = AVCaptureDevicePositionBack;
+    });
+    }
 #pragma mark – Protocol CvVideoCameraDelegate
 
 #ifdef __cplusplus
@@ -54,7 +61,7 @@ cv::RNG rng(12345);
 {
     std::vector<std::vector<cv::Point> > contours;
     std::vector<cv::Vec4i> hierarchy;
-    int thresh = 100;
+    int thresh = 120-(floor(self.slider.value*100)+20);
     src = image;
     cvtColor( src, src_gray, CV_BGR2GRAY );
     blur( src_gray, src_gray, cvSize(3, 3));
@@ -79,7 +86,7 @@ cv::RNG rng(12345);
     {
         cv::Scalar color = cvScalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
         drawContours( drawing, contours, i, color, CV_FILLED,  8, hierarchy);
-        drawContours( drawing, hull, i, color, 4, 8, std::vector<cv::Vec4i>());
+        //drawContours( drawing, hull, i, color, CV_FILLED, 8, std::vector<cv::Vec4i>());
     }
  
     UIImage *imag = [self UIImageFromCVMat:drawing];
