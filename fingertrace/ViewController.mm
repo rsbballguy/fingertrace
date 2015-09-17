@@ -10,8 +10,14 @@
 #import <opencv2/opencv.hpp>
 #import <opencv2/imgproc.hpp>
 #import <opencv2/highgui.hpp>
+#include <opencv2/core/core.hpp>
 #import <opencv2/highgui/highgui.hpp>
+#include <opencv2/video/background_segm.hpp>
+#include "opencv2/imgcodecs.hpp"
+#include "opencv2/videoio.hpp"
+#include <opencv2/video.hpp>
 #include <iostream>
+#include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
 @interface ViewController ()
@@ -23,7 +29,8 @@ cv::Mat canny_output;
 cv::Mat src;
 cv::Mat src_gray;
 cv::RNG rng(12345);
-Ptr<BackgroundSubtractor> pMOG2;
+UIImage *tobesaved;
+//Ptr<BackgroundSubtractor> pMOG2;
 //std::vector<std::vector<Point> > contours;
 //std::vector<cv::Vec4i> hierarchy;
 - (void)viewDidLoad {
@@ -49,11 +56,12 @@ Ptr<BackgroundSubtractor> pMOG2;
     // Dispose of any resources that can be recreated.
 }
 - (IBAction)flip:(id)sender {
-    NSLog(@"Button Pressed");
-    dispatch_async(dispatch_get_main_queue(), ^{
-        self.videoCamera.defaultAVCaptureDevicePosition = AVCaptureDevicePositionBack;
-    });
+    [self.videoCamera switchCameras];
     }
+- (IBAction)click:(id)sender {
+    UIImageWriteToSavedPhotosAlbum(tobesaved, nil, nil, nil);
+
+}
 #pragma mark – Protocol CvVideoCameraDelegate
 
 #ifdef __cplusplus
@@ -90,7 +98,7 @@ Ptr<BackgroundSubtractor> pMOG2;
     }
  
     UIImage *imag = [self UIImageFromCVMat:drawing];
-
+    tobesaved = imag;
     dispatch_async(dispatch_get_main_queue(), ^{
         [_contourimg setImage:imag];
     });

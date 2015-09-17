@@ -40,6 +40,15 @@
                                     <action selector="flip:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="uQg-F1-Zgz"/>
                                 </connections>
                             </button>
+                            <button opaque="NO" contentMode="scaleToFill" ambiguous="YES" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="i6F-Vb-44v">
+                                <rect key="frame" x="531" y="14" width="35" height="30"/>
+                                <state key="normal" title="Click">
+                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <action selector="click:" destination="vXZ-lx-hvc" eventType="touchUpInside" id="RDp-W9-6Uz"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                         <constraints>
@@ -48,6 +57,7 @@
                             <constraint firstItem="PDI-Wn-Sa9" firstAttribute="leading" secondItem="kh9-bI-dsS" secondAttribute="leadingMargin" constant="-16" id="aXL-MD-kCY"/>
                             <constraint firstItem="2fi-mo-0CV" firstAttribute="top" secondItem="PDI-Wn-Sa9" secondAttribute="bottom" id="e2A-jh-Kxk"/>
                             <constraint firstAttribute="centerX" secondItem="x5b-fR-BVN" secondAttribute="centerX" id="fMm-3m-ADs"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="i6F-Vb-44v" secondAttribute="trailing" constant="18" id="xiC-Uf-dOZ"/>
                         </constraints>
                     </view>
                     <connections>
@@ -65,7 +75,7 @@
                     </state>
                 </button>
             </objects>
-            <point key="canvasLocation" x="547" y="393"/>
+            <point key="canvasLocation" x="559" y="399"/>
         </scene>
     </scenes>
     <resources>
