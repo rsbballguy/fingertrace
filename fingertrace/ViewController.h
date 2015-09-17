@@ -17,5 +17,6 @@
 @property (strong, nonatomic) IBOutlet UISlider *slider;
 -(UIImage *)UIImageFromCVMat:(cv::Mat)cvMat;
 -(NSArray*)getRGBAsFromImage:(UIImage*)image atX:(int)x andY:(int)y count:(int)count;
+-(NSString *)returnFingerCoordinates:(UIImage *)ima;
 @end
 

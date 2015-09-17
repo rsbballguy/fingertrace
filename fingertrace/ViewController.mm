@@ -161,4 +161,19 @@ UIImage *tobesaved;
     
     return result;
 }
+-(NSString *)returnFingerCoordinates:(UIImage *)ima{
+    NSString *coor = @"";
+    CGFloat red, green, blue, alpha;
+    for(int x = 0; x<ima.size.width; x++){
+        for(int y=0; y<ima.size.height; y++){
+            NSArray *thisarray = [self getRGBAsFromImage:ima atX:x andY:y count:1];
+            UIColor *redColor = thisarray[0];
+            [redColor getRed: &red green: &green blue: &blue alpha: &alpha];
+            if(red<255 && blue<255 && green<255){
+                //Algorithm
+            }
+        }
+    }
+    return coor;
+}
 @end
