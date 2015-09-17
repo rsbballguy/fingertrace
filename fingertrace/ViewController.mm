@@ -10,11 +10,11 @@
 #import <opencv2/opencv.hpp>
 #import <opencv2/imgproc.hpp>
 #import <opencv2/highgui.hpp>
-#include <opencv2/core/core.hpp>
 #import <opencv2/highgui/highgui.hpp>
 #include <opencv2/video/background_segm.hpp>
-#include "opencv2/imgcodecs.hpp"
-#include "opencv2/videoio.hpp"
+#include <opencv2/imgcodecs.hpp>
+#include <opencv2/videoio.hpp>
+#include <opencv2/core/core.hpp>
 #include <opencv2/video.hpp>
 #include <iostream>
 #include <sstream>
@@ -30,14 +30,8 @@ cv::Mat src;
 cv::Mat src_gray;
 cv::RNG rng(12345);
 UIImage *tobesaved;
-//Ptr<BackgroundSubtractor> pMOG2;
-//std::vector<std::vector<Point> > contours;
-//std::vector<cv::Vec4i> hierarchy;
 - (void)viewDidLoad {
     [super viewDidLoad];
-    // Do any additional setup after loading the view, typically from a nib.
-//    UIAlertView * alert = [[UIAlertView alloc] initWithTitle:@"Hello!" message:@"Welcome to OpenCV" delegate:self cancelButtonTitle:@"Continue" otherButtonTitles:nil];
-//    [alert show];
     self.videoCamera = [[CvVideoCamera alloc] initWithParentView:_ImageView];
     self.videoCamera.delegate = self;
     self.videoCamera.defaultAVCaptureDevicePosition = AVCaptureDevicePositionFront;
@@ -45,7 +39,6 @@ UIImage *tobesaved;
     self.videoCamera.defaultAVCaptureVideoOrientation = AVCaptureVideoOrientationPortraitUpsideDown;
     self.videoCamera.defaultFPS = 30;
     self.videoCamera.rotateVideo = YES;
-//    self.videoCamera.grayscale = NO;
     [self.videoCamera start];
     _contourimg.transform = CGAffineTransformMakeRotation(M_PI);
     _ImageView.transform = CGAffineTransformMakeRotation((M_PI*3)/2);
@@ -82,19 +75,10 @@ UIImage *tobesaved;
     {
          convexHull( cv::Mat(contours[i]), hull[i], false, true);
     }
-//    int j = 0;
-//    for(j = 0; j < contours.size(); j++ )
-//    {
-//        cv::convexityDefects(contours[j], hull, convexdef);
-//    }
-//    for (auto vec : convexdef){
-//        std::cout << vec << std::endl;
-//    }
     for( int i = 0; i< contours.size(); i++ )
     {
         cv::Scalar color = cvScalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
         drawContours( drawing, contours, i, color, CV_FILLED,  8, hierarchy);
-        //drawContours( drawing, hull, i, color, CV_FILLED, 8, std::vector<cv::Vec4i>());
     }
  
     UIImage *imag = [self UIImageFromCVMat:drawing];
@@ -104,7 +88,7 @@ UIImage *tobesaved;
     });
     
     
-    //CvContourScanner thisscanner = cvStartFindContours(&image, connectedCompStorage);
+//    CvContourScanner thisscanner = cvStartFindContours(&image, connectedCompStorage);
 //    cv::findContours( image, contours, hierarchy, cv::RETR_CCOMP, cv::CHAIN_APPROX_TC89_KCOS);
 //    for ( size_t i=0; i<contours.size(); ++i )
 //    {
