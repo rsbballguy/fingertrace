@@ -171,9 +171,23 @@ UIImage *tobesaved;
             [redColor getRed: &red green: &green blue: &blue alpha: &alpha];
             if(red<255 && blue<255 && green<255){
                 //Algorithm
+                int c = 0;
+                CGRect screenRect = [[UIScreen mainScreen] bounds];
+                CGFloat screenWidth = screenRect.size.width;
+                CGFloat screenHeight = screenRect.size.height;
+                while((x+c)<screenWidth && (x-c)<screenHeight){
+                    thisarray = [self getRGBAsFromImage:ima atX:x+c andY:y count:1];
+                    redColor = thisarray[0];
+                    [redColor getRed: &red green: &green blue: &blue alpha: &alpha];
+                    c++;
+                }
             }
         }
     }
     return coor;
+}
+-(BOOL)doesImageWork:(UIImage *)ima{
+    BOOL tf = false;
+    return tf;
 }
 @end
