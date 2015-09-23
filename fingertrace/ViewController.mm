@@ -48,6 +48,7 @@ UIImage *tobesaved;
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
+#pragma mark – Actions
 - (IBAction)flip:(id)sender {
     [self.videoCamera switchCameras];
     }
@@ -107,6 +108,7 @@ UIImage *tobesaved;
 //    }
 }
 #endif
+#pragma mark – Helper Methods
 -(UIImage *)UIImageFromCVMat:(cv::Mat)cvMat
 {
     NSData *data = [NSData dataWithBytes:cvMat.data length:cvMat.elemSize()*cvMat.total()];
@@ -156,7 +158,7 @@ UIImage *tobesaved;
         UIColor *acolor = [UIColor colorWithRed:red green:green blue:blue alpha:alpha];
         [result addObject:acolor];
     }
-    
+
     free(rawData);
     
     return result;
@@ -164,27 +166,82 @@ UIImage *tobesaved;
 -(NSString *)returnFingerCoordinates:(UIImage *)ima{
     NSString *coor = @"";
     CGFloat red, green, blue, alpha;
-    for(int x = 0; x<ima.size.width; x++){
-        for(int y=0; y<ima.size.height; y++){
+    NSMutableArray *coordinates =[[NSMutableArray alloc] initWithCapacity:99999];
+    int width = ima.size.width;
+    int height = ima.size.height;
+    //Create coordinate matrix
+    for(int x = 0; x<width; x++){
+        NSMutableArray *spot =[[NSMutableArray alloc] initWithCapacity:99999];
+        for(int y=0; y<height; y++){
             NSArray *thisarray = [self getRGBAsFromImage:ima atX:x andY:y count:1];
             UIColor *redColor = thisarray[0];
             [redColor getRed: &red green: &green blue: &blue alpha: &alpha];
-            if(red<255 && blue<255 && green<255){
-                //Algorithm
-                int c = 0;
-                CGRect screenRect = [[UIScreen mainScreen] bounds];
-                CGFloat screenWidth = screenRect.size.width;
-                CGFloat screenHeight = screenRect.size.height;
-                while((x+c)<screenWidth && (x-c)<screenHeight){
-                    thisarray = [self getRGBAsFromImage:ima atX:x+c andY:y count:1];
-                    redColor = thisarray[0];
-                    [redColor getRed: &red green: &green blue: &blue alpha: &alpha];
-                    c++;
-                }
+            if(red>0 && blue>0 && green>0){
+                [spot addObject:[NSNumber numberWithBool:true]];
             }
+            else{
+                [spot addObject:[NSNumber numberWithBool:false]];
+            }
+            [coordinates addObject: spot];
         }
     }
+    //Get straight lines and corresponding r values
+    int minthresh = 100;
+    for(int xx = 0; xx<width; xx++){
+        NSArray *plot = [self returnResidualPlot:coordinates line:xx width:width height:height];
+        if([[plot objectAtIndex:1] integerValue]<minthresh){
+            
+        }
+        //[values addObject: [NSNumber numberWithInt:plot]];
+    }
+    //Get smallest and second smallest values in array
     return coor;
+}
+-(NSArray *)returnResidualPlot:(NSArray *)coor line:(int)myline width:(int)mywidth height:(int)myheight{
+    NSMutableArray *fincount;
+    int occurances = 0;
+    int spacecount = 0;
+    for(int b = 0; b<myheight; b++){
+        //BOOL tf = [[[coor objectAtIndex:b] objectAtIndex:0] boolValue];
+        int c = 0;
+        int a = 0;
+        while(c<10){
+            if(myline+c > mywidth){
+                if([[coor objectAtIndex:myline-c] objectAtIndex:b]){
+                    spacecount+=c;
+                }
+                else{
+                    a++;
+                }
+            }
+            else if(myline-c < 0){
+                if([[coor objectAtIndex:myline+c] objectAtIndex:b]){
+                    spacecount+=c;
+                }
+                else{
+                    a++;
+                }
+            }
+            else{
+                if([[coor objectAtIndex:myline+c] objectAtIndex:b]){
+                    spacecount+=c;
+                }
+                else if([[coor objectAtIndex:myline-c] objectAtIndex:b]){
+                    spacecount+=c;
+                }
+                else{
+                    a++;
+                }
+            }
+            c++;
+        }
+        if(a>=9){
+            occurances++;
+        }
+    }
+    [fincount addObject:[NSNumber numberWithInteger:spacecount]];
+    [fincount addObject:[NSNumber numberWithInteger:occurances]];
+    return fincount;
 }
 -(BOOL)doesImageWork:(UIImage *)ima{
     BOOL tf = false;
