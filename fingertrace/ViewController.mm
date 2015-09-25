@@ -29,6 +29,7 @@ cv::Mat canny_output;
 cv::Mat src;
 cv::Mat src_gray;
 cv::RNG rng(12345);
+float blue, green, red;
 UIImage *tobesaved;
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -78,15 +79,22 @@ UIImage *tobesaved;
     }
     for( int i = 0; i< contours.size(); i++ )
     {
-        cv::Scalar color = cvScalar( rng.uniform(0, 255), rng.uniform(0,255), rng.uniform(0,255) );
+        cv::Scalar color = cvScalar( 255.0, 255.0, 255.0);
         drawContours( drawing, contours, i, color, CV_FILLED,  8, hierarchy);
     }
  
-    UIImage *imag = [self UIImageFromCVMat:drawing];
+    UIImage *imag = [self UIImageFromCVMat:image];
     tobesaved = imag;
     dispatch_async(dispatch_get_main_queue(), ^{
         [_contourimg setImage:imag];
     });
+//    cv::Vec3f intensity = image.at<cv::Vec3f>(30, 30);
+//    blue = intensity.val[0];
+//    green = intensity.val[1];
+//    red = intensity.val[2];
+//    NSLog(@"%f %f %f", blue, green, red);
+
+    NSString *ohgodno = [self returnFingerCoordinates:imag];
     
     
 //    CvContourScanner thisscanner = cvStartFindContours(&image, connectedCompStorage);
@@ -109,6 +117,17 @@ UIImage *tobesaved;
 }
 #endif
 #pragma mark – Helper Methods
+-(NSArray *)returnColors:(int)xval y:(int)yval{
+    NSMutableArray *colors;
+    cv::Vec3f intensity = src.at<cv::Vec3f>(xval, yval);
+    blue = intensity.val[0];
+    green = intensity.val[1];
+    red = intensity.val[2];
+    [colors addObject:[NSNumber numberWithFloat:blue]];
+    [colors addObject:[NSNumber numberWithFloat:green]];
+    [colors addObject:[NSNumber numberWithFloat:red]];
+    return colors;
+}
 -(UIImage *)UIImageFromCVMat:(cv::Mat)cvMat
 {
     NSData *data = [NSData dataWithBytes:cvMat.data length:cvMat.elemSize()*cvMat.total()];
@@ -127,9 +146,9 @@ UIImage *tobesaved;
     CGColorSpaceRelease( colorSpace );
     return finalImage;
 }
-- (NSArray*)getRGBAsFromImage:(UIImage*)image atX:(int)x andY:(int)y count:(int)count
+- (NSArray*)getRGBAsFromImage:(UIImage*)image atX:(int)xp andY:(int)yp count:(int)count
 {
-    NSMutableArray *result = [NSMutableArray arrayWithCapacity:count];
+    NSMutableArray *resultColor = [NSMutableArray array];
     CGImageRef imageRef = [image CGImage];
     NSUInteger width = CGImageGetWidth(imageRef);
     NSUInteger height = CGImageGetHeight(imageRef);
@@ -142,26 +161,20 @@ UIImage *tobesaved;
                                                  bitsPerComponent, bytesPerRow, colorSpace,
                                                  kCGImageAlphaPremultipliedLast | kCGBitmapByteOrder32Big);
     CGColorSpaceRelease(colorSpace);
-    
     CGContextDrawImage(context, CGRectMake(0, 0, width, height), imageRef);
     CGContextRelease(context);
-    
-    NSUInteger byteIndex = (bytesPerRow * y) + x * bytesPerPixel;
-    for (int i = 0 ; i < count ; ++i)
-    {
-        CGFloat red   = (rawData[byteIndex]     * 1.0) / 255.0;
-        CGFloat green = (rawData[byteIndex + 1] * 1.0) / 255.0;
-        CGFloat blue  = (rawData[byteIndex + 2] * 1.0) / 255.0;
-        CGFloat alpha = (rawData[byteIndex + 3] * 1.0) / 255.0;
-        byteIndex += bytesPerPixel;
-        
-        UIColor *acolor = [UIColor colorWithRed:red green:green blue:blue alpha:alpha];
-        [result addObject:acolor];
-    }
-
+    // Now your rawData contains the image data in the RGBA8888 pixel format.
+    int byteIndex = (bytesPerRow * yp) + xp * bytesPerPixel;
+    CGFloat red   = (rawData[byteIndex]     * 1.0) /255.0;
+    CGFloat green = (rawData[byteIndex + 1] * 1.0)/255.0 ;
+    CGFloat blue  = (rawData[byteIndex + 2] * 1.0)/255.0 ;
+    CGFloat alpha = (rawData[byteIndex + 3] * 1.0) /255.0;
+    byteIndex += 4;
+    UIColor *color = [UIColor colorWithRed:red green:green blue:blue alpha:alpha];
+    [resultColor addObject:color];
+    //NSLog(@"width:%i hight:%i Color:%@",width,height,[color description]);
     free(rawData);
-    
-    return result;
+    return resultColor;
 }
 -(NSString *)returnFingerCoordinates:(UIImage *)ima{
     NSString *coor = @"";
@@ -173,27 +186,42 @@ UIImage *tobesaved;
     for(int x = 0; x<width; x++){
         NSMutableArray *spot =[[NSMutableArray alloc] initWithCapacity:99999];
         for(int y=0; y<height; y++){
-            NSArray *thisarray = [self getRGBAsFromImage:ima atX:x andY:y count:1];
-            UIColor *redColor = thisarray[0];
-            [redColor getRed: &red green: &green blue: &blue alpha: &alpha];
-            if(red>0 && blue>0 && green>0){
-                [spot addObject:[NSNumber numberWithBool:true]];
-            }
-            else{
-                [spot addObject:[NSNumber numberWithBool:false]];
-            }
-            [coordinates addObject: spot];
+            
+//            NSLog(@"%i", width);
+//             NSLog(@"%i", height);
+            NSArray *thisarray = [self returnColors:x y:y];
+            NSLog(@"%f %f %f", thisarray[0],  thisarray[1], thisarray[2]);
+            //UIColor *redColor = thisarray[0];
+            //[redColor getRed: &red green: &green blue: &blue alpha: &alpha];
+            //NSLog(@"%f %f %f", red, green, blue);
+//            if(red>0 && blue>0 && green>0){
+//                [spot addObject:[NSNumber numberWithBool:true]];
+//            }
+//            else{
+//                [spot addObject:[NSNumber numberWithBool:false]];
+//            }
+//            [coordinates addObject: spot];
         }
+        //NSLog(@"done with first loop");
     }
     //Get straight lines and corresponding r values
-    int minthresh = 100;
-    for(int xx = 0; xx<width; xx++){
-        NSArray *plot = [self returnResidualPlot:coordinates line:xx width:width height:height];
-        if([[plot objectAtIndex:1] integerValue]<minthresh){
-            
-        }
-        //[values addObject: [NSNumber numberWithInt:plot]];
-    }
+//    int minthresh = 100;
+//    int occthresh = 200;
+//    for(int xx = 0; xx<width; xx++){
+//        NSArray *plot = [self returnResidualPlot:coordinates line:xx width:width height:height];
+//        if([[plot objectAtIndex:0] integerValue]<minthresh){
+//            if([[plot objectAtIndex:1] integerValue]<occthresh){
+//                NSLog(@"%i", xx);
+//            }
+//            else{
+//                NSLog(@"no");
+//            }
+//        }
+//        else{
+//            NSLog(@"not even here");
+//        }
+//        //[values addObject: [NSNumber numberWithInt:plot]];
+//    }
     //Get smallest and second smallest values in array
     return coor;
 }
