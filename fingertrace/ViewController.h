@@ -20,6 +20,6 @@
 -(NSString *)returnFingerCoordinates:(UIImage *)ima;
 -(NSArray *)returnResidualPlot:(NSArray *)coor line:(int)myline width:(int)mywidth height:(int)myheight;
 -(BOOL)doesImageWork:(UIImage *)ima;
--(NSArray *)returnColors:(int)xval y:(int)yval
+-(NSArray *)returnColors:(int)xval y:(int)yval;
 @end
 

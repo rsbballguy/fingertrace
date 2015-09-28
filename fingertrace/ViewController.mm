@@ -83,7 +83,7 @@ UIImage *tobesaved;
         drawContours( drawing, contours, i, color, CV_FILLED,  8, hierarchy);
     }
  
-    UIImage *imag = [self UIImageFromCVMat:image];
+    UIImage *imag = [self UIImageFromCVMat:drawing];
     tobesaved = imag;
     dispatch_async(dispatch_get_main_queue(), ^{
         [_contourimg setImage:imag];
@@ -189,8 +189,8 @@ UIImage *tobesaved;
             
 //            NSLog(@"%i", width);
 //             NSLog(@"%i", height);
-            NSArray *thisarray = [self returnColors:x y:y];
-            NSLog(@"%f %f %f", thisarray[0],  thisarray[1], thisarray[2]);
+            //NSArray *thisarray = [self returnColors:x y:y];
+            //NSLog(@"%f %f %f", thisarray[0],  thisarray[1], thisarray[2]);
             //UIColor *redColor = thisarray[0];
             //[redColor getRed: &red green: &green blue: &blue alpha: &alpha];
             //NSLog(@"%f %f %f", red, green, blue);
