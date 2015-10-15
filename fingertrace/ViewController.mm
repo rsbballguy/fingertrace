@@ -73,10 +73,10 @@ UIImage *tobesaved;
     cv::Mat drawing = cv::Mat::zeros( canny_output.size(), CV_8UC3 );
     std::vector<std::vector<cv::Point> >hull( contours.size() );
     std::vector<cv::Vec4i>convexdef;
-    for( int i = 0; i < contours.size(); i++ )
-    {
-         convexHull( cv::Mat(contours[i]), hull[i], false, true);
-    }
+//    for( int i = 0; i < contours.size(); i++ )
+//    {
+//         convexHull( cv::Mat(contours[i]), hull[i], false, true);
+//    }
     for( int i = 0; i< contours.size(); i++ )
     {
         cv::Scalar color = cvScalar( 255.0, 255.0, 255.0);
@@ -88,11 +88,6 @@ UIImage *tobesaved;
     dispatch_async(dispatch_get_main_queue(), ^{
         [_contourimg setImage:imag];
     });
-//    cv::Vec3f intensity = image.at<cv::Vec3f>(30, 30);
-//    blue = intensity.val[0];
-//    green = intensity.val[1];
-//    red = intensity.val[2];
-//    NSLog(@"%f %f %f", blue, green, red);
 
     NSString *ohgodno = [self returnFingerCoordinates:imag];
     
@@ -146,6 +141,28 @@ UIImage *tobesaved;
     CGColorSpaceRelease( colorSpace );
     return finalImage;
 }
+- (cv::Mat)cvMatFromUIImage:(UIImage *)image
+{
+    CGColorSpaceRef colorSpace = CGImageGetColorSpace(image.CGImage);
+    CGFloat cols = image.size.width;
+    CGFloat rows = image.size.height;
+    
+    cv::Mat cvMat(rows, cols, CV_8UC4); // 8 bits per component, 4 channels (color channels + alpha)
+    
+    CGContextRef contextRef = CGBitmapContextCreate(cvMat.data,                 // Pointer to  data
+                                                    cols,                       // Width of bitmap
+                                                    rows,                       // Height of bitmap
+                                                    8,                          // Bits per component
+                                                    cvMat.step[0],              // Bytes per row
+                                                    colorSpace,                 // Colorspace
+                                                    kCGImageAlphaNoneSkipLast |
+                                                    kCGBitmapByteOrderDefault); // Bitmap info flags
+    
+    CGContextDrawImage(contextRef, CGRectMake(0, 0, cols, rows), image.CGImage);
+    CGContextRelease(contextRef);
+    
+    return cvMat;
+}
 - (NSArray*)getRGBAsFromImage:(UIImage*)image atX:(int)xp andY:(int)yp count:(int)count
 {
     NSMutableArray *resultColor = [NSMutableArray array];
@@ -178,15 +195,19 @@ UIImage *tobesaved;
 }
 -(NSString *)returnFingerCoordinates:(UIImage *)ima{
     NSString *coor = @"";
-    CGFloat red, green, blue, alpha;
-    NSMutableArray *coordinates =[[NSMutableArray alloc] initWithCapacity:99999];
+    CGFloat red, green, blue;
     int width = ima.size.width;
     int height = ima.size.height;
     //Create coordinate matrix
     for(int x = 0; x<width; x++){
-        NSMutableArray *spot =[[NSMutableArray alloc] initWithCapacity:99999];
         for(int y=0; y<height; y++){
-            
+            cv::Mat greyMat;
+            greyMat = [self cvMatFromUIImage:ima];
+            cv::Vec3f intensity = greyMat.at<cv::Vec3f>(x, y);
+            blue = intensity.val[0];
+            green = intensity.val[1];
+                red = intensity.val[2];
+                NSLog(@"%f %f %f", blue, green, red);
 //            NSLog(@"%i", width);
 //             NSLog(@"%i", height);
             //NSArray *thisarray = [self returnColors:x y:y];
